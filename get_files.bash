@@ -1,20 +1,14 @@
 #!/bin/bash
 
-#WRK=$SCRATCH/investigation/cycles
+# DEODE runs
 WRK=$SCRATCH/investigation/deode_spp
-#WRK=$SCRATCH/investigation/vterm
-
-# Experiment list
-#EXP="cy46_spp_p01 cy49_spp_p01"
-#EXP="cy46_spp_p01_fix2"
-#EXP="Cy46h111_5SPPEDAENSSuP"
-#EXP="Cy46h111_19SPPCV043EDAENSSuP"
 EXP="de_fin_5SPP_bnd_9km"
-#EXP="de_fin_noSPP_bnd_9km"
+is_deode=true
 
-# isx: an ugly solution to running p01 and p01x exps and wanting to
-# rename everything to p01.
-isx=
+# Harmonie/HarmonieCSC runs
+#WRK=$SCRATCH/investigation/cycles
+#EXP="cy46_spp_p01 cy49_spp_p01" # Multiple experiments can be fetched
+#is_deode=false
 
 # Are the files in ec or ectmp
 ec=ec
@@ -22,32 +16,33 @@ ec=ec
 # User account
 usr=fi3
 
-# Either provide the dates in a list, or use a timerange
-# with SDATE and EDATE. If DATELIST is not empty SDATE and
-# EDATE are automatically skipped.
+# isx: an ugly solution to running p01 and p01x exps and wanting to
+# rename everything to p01.
+isx=
+
+# Either provide the dates in a list ("DATE1 DATE2" for multiple or
+# "DATE1" for single date), or use a timerange with SDATE and EDATE.
+#If DATELIST is not empty SDATE and EDATE are automatically skipped.
 # 
-#DATELIST="20250724" # 20250111"
-DATELIST="20240826" # 20250111"
-#DATELIST="20251017" #"20241119"
+DATELIST="20240826" 
 # or
 SDATE=20220716
 EDATE=20220721
 
 # Forecast start hour
-# Use "00 12" for multiple times
+# Use "00 12" for multiple times, or "00" for a single time
 #
-HH="00" #12"  
+HH="00"  
 
 # Forecast length
 # Use "0012 0024" for multiple times, or "0012" for a single fctime.
 #
-FCLEN="033" # 012 018" 
-#FCLEN="006 012 018 024"
+FCLEN="035"
 
 # Members
-# Use "001 002" for multiple members
+# Use "001 002" for multiple members, or "000" for a single member
 #
-MEMB="000 001 002" # 001 002 003" # 001 002 003" # 004 005 006" # 001 002 003 004 005 006" 
+MEMB="000 001"
 
 
 # Check for dir
@@ -86,19 +81,27 @@ for date in $DATELIST; do
 		    file=$WRK/${exp}-$date${hh}-m${memb}+${fclen}h
 		    if [ ! -f $file ]; then
 			echo "Fetching $file"
-			#ecp ${ec}:/${usr}/harmonie/${exp}${isx}/$yy/$mm/$dd/$hh/mbr$memb/ICMSHHARM+0$fclen $file
-			ecp ${ec}:/${usr}/deode/${exp}${isx}/archive/$yy/$mm/$dd/$hh/mbr$memb/ICMSHDEOD+0${fclen}h00m00s $file
+			# Deode and Harmonie/HarmonieCSC runs have different path and file name structure
+			if $is_deode; then
+			    ecp ${ec}:/${usr}/deode/${exp}${isx}/archive/$yy/$mm/$dd/$hh/mbr$memb/ICMSHDEOD+0${fclen}h00m00s $file
+			else
+			    ecp ${ec}:/${usr}/harmonie/${exp}${isx}/$yy/$mm/$dd/$hh/mbr$memb/ICMSHHARM+0$fclen $file
+			fi
 		    else
 			echo "Existing file found $file"
 		    fi
 		    
-		    file2=$WRK/${exp}_pl-$date${hh}-m${memb}+${fclen}h
-		    if [ ! -f $file2 ]; then
-			echo "Fetching $file2"
-			#ecp ${ec}:/${usr}/harmonie/${exp}${isx}/$yy/$mm/$dd/$hh/mbr$memb/PFHARMMETCOOP25B+0$fclen $file2
-			#ecp ${ec}:/${usr}/deode/${exp}${isx}/archive/$yy/$mm/$dd/$hh/mbr$memb/GRIBPFDEOD+0${fclen}h00m00s $file2
+		    if $is_deode; then
+			# No pl files for Deode
+			continue
 		    else
-			echo "Existing file found $file2"
+			file2=$WRK/${exp}_pl-$date${hh}-m${memb}+${fclen}h
+			if [ ! -f $file2 ]; then
+			    echo "Fetching $file2"
+			    ecp ${ec}:/${usr}/harmonie/${exp}${isx}/$yy/$mm/$dd/$hh/mbr$memb/PFHARMMETCOOP25B+0$fclen $file2	
+			else
+			    echo "Existing file found $file2"
+			fi
 		    fi
 		done
 	    done
