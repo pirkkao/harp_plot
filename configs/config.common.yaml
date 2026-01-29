@@ -1,0 +1,71 @@
+local_fa_ml:
+  file_path: "/ec/scratch/fi3/investigation/cycles/"
+  file_template: "{fcst_model}-{YYYY}{MM}{DD}{HH}-m{MBR3}+{LDT3}h"
+  file_format: NULL
+  file_format_opts: ""
+
+local_fa_pl:
+  file_path: "/ec/scratch/fi3/investigation/cycles/"
+  file_template: "{fcst_model}_pl-{YYYY}{MM}{DD}{HH}-m{MBR3}+{LDT3}h"
+  file_format: NULL
+  file_format_opts: ""
+
+meps_oper:
+  file_path: "https://thredds.met.no/thredds/dodsC/meps25epsarchive"
+  file_template: "{YYYY}/{MM}/{DD}/{HH}/meps_mbr{MBR3}_sfc_{YYYY}{MM}{DD}T{HH}Z.ncml"
+  file_format: "netcdf"
+  file_format_opts: netcdf_opts("met_norway_det")
+
+arome_arctic:
+  file_path: "https://thredds.met.no/thredds/dodsC/aromearcticarchive"
+  file_template: "{YYYY}/{MM}/{DD}/{HH}/arome_arctic_mbr000_sfc_{YYYY}{MM}{DD}T{HH}Z.ncml"
+  exps: ["arctic"]
+  ensm: [0]
+  flds: ["air_temperature_2m"]
+  file_format: "netcdf"
+  file_format_opts: ""
+
+fill:
+  sdev:
+    type: scale_fill_stepsn
+    colours: "acton"
+    direction: -1
+    limits: "c(0,10)"
+    breaks: "seq(0,6,0.5)"
+    
+  diff:
+    type: scale_fill_stepsn
+    colours: "vik"
+    direction: 1
+    limits: "c(-15,15)"
+    breaks: "seq(-15,15,3)"
+
+  t2m_warm:
+    type: scale_fill_stepsn
+    colours: "bilbao"
+    direction: -1
+    limits: "c(5,45)"
+    breaks: "seq(5,45,4)"
+    
+  t2m_cold:
+    type: scale_fill_stepsn
+    colours: "oslo"
+    direction: 1
+    limits: "c(-30,-5)"
+    breaks: "seq(-30,-5,-5)"
+
+  precip15:
+    type: scale_fill_stepsn
+    colours: "oslo"
+    direction: -1
+    limits: "c(0.125,15)"
+    breaks: "seq_double(0.125,15)"
+    opts: ",trans=\"log\",begin=0.2"
+
+  precip25:
+    type: scale_fill_stepsn
+    colours: "oslo"
+    direction: -1
+    limits: "c(0.125,25)"
+    breaks: "seq_double(0.125,25)"
+    opts: ",trans=\"log\",begin=0.2"

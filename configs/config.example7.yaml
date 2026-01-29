@@ -1,0 +1,126 @@
+#
+# EXAMPLE7:
+# Work-in-progress, instead of plotting the precip
+# from the whole forecast length, it is also possible
+# to decumulate the precipitation fields. In order to
+# do this, two forecast lead times need to be read in.
+# Currently, the first lead time is then discarded.
+#
+data:
+  1:
+    tmpl: local_fa_ml
+    file_path: "/ec/scratch/fi3/investigation/deode_spp"
+    exp:  ["de_fin_5SPP_bnd_9km"]
+    ensm: [0,1,2]
+    flds: ["SURFACCPLUIE"]
+    decum: true # Decumulate accumulated precipitation,
+                # will only keep last time step data
+  2:
+    tmpl: local_fa_ml
+    file_path: "/ec/scratch/fi3/investigation/deode_spp"
+    exp:  ["de_fin_noSPP_bnd_9km"]
+    ensm: [0,1,2]
+    flds: ["SURFACCPLUIE"]
+    decum: true # Decumulate accumulated precipitation,
+                # will only keep last time step data
+  3: NULL
+
+times:
+  sdate: 2024082600
+  lead_times: [33, 36]
+
+grid:
+  subgrid: 
+  regrid: true
+
+opts:
+  fig_name: "fig/example7.png"
+  fig_size: [15,15,300] # Heigh,width,dpi
+
+# plot:
+#   row1:
+#     column1:
+#       ...
+#     column2:
+#       ...
+#   row2:
+#     column1:
+#       ...
+#     column2:
+#       ...
+plot:
+  1:
+    1:
+      type: "fc"
+      data1: 1
+      ensm: [0]
+      name: "d0"
+      col_map: 1
+    2: 
+      type: "fc"
+      data1: 1
+      ensm: [1]
+      name: "d1"
+      col_map: 1
+    3: 
+      type: "fc"
+      data1: 1
+      ensm: [2]
+      name: "d2"
+      col_map: 1
+    4: NULL
+  2:
+    1:
+      type: "fc"
+      data1: 2
+      ensm: [0]
+      name: "d0"
+      col_map: 1
+    2: 
+      type: "fc"
+      data1: 2
+      ensm: [1]
+      name: "d1"
+      col_map: 1
+    3: 
+      type: "fc"
+      data1: 2
+      ensm: [2]
+      name: "d2"
+      col_map: 1
+    4: NULL
+  3:
+    1:
+      type: "diff"
+      data1: 2
+      data2: 1
+      ensm: [0]
+      name: "diff"
+      col_map: 2
+    2:
+      type: "diff"
+      data1: 2
+      data2: 1
+      ensm: [1]
+      name: "diff"
+      col_map: 2
+    3:
+      type: "diff"
+      data1: 2
+      data2: 1
+      ensm: [2]
+      name: "diff"
+      col_map: 2
+    4: NULL
+  4: NULL
+
+col_maps:
+  1:
+    name: "precip15"
+  2:
+    name: "diff"
+    breaks: "c(-8,-5,-4,-3,-2,-1,-0.5,-0.125,0,0.125,0.5,1,2,3,4,5,8)"
+  3: NULL
+
+
+

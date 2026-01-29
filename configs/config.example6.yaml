@@ -1,0 +1,119 @@
+#
+# EXAMPLE6:
+# Furthermore, it is also possible to do the same difference
+# and comparison maps with DEODE/Tactus data. Here, first
+# two members along with ctrl are plotted.
+#
+data:
+  1:
+    tmpl: local_fa_ml
+    file_path: "/ec/scratch/fi3/investigation/deode_spp"
+    exp:  ["de_fin_5SPP_bnd_9km"]
+    ensm: [0,1,2]
+    flds: ["SURFACCPLUIE"]
+  2:
+    tmpl: local_fa_ml
+    file_path: "/ec/scratch/fi3/investigation/deode_spp"
+    exp:  ["de_fin_noSPP_bnd_9km"]
+    ensm: [0,1,2]
+    flds: ["SURFACCPLUIE"]
+  3: NULL
+
+times:
+  sdate: 2024082600
+  lead_times: 36
+
+grid:
+  subgrid: 
+  regrid: true
+
+opts:
+  fig_name: "fig/example6.png"
+  fig_size: [15,10,300] # [width,heigh,dpi]
+  
+# plot:
+#   row1:
+#     column1:
+#       ...
+#     column2:
+#       ...
+#   row2:
+#     column1:
+#       ...
+#     column2:
+#       ...
+plot:
+  1:
+    1:
+      type: "fc"
+      data1: 1
+      ensm: [0]
+      name: "d0"
+      col_map: 1
+    2: 
+      type: "fc"
+      data1: 1
+      ensm: [1]
+      name: "d1"
+      col_map: 1
+    3: 
+      type: "fc"
+      data1: 1
+      ensm: [2]
+      name: "d2"
+      col_map: 1
+    4: NULL
+  2:
+    1:
+      type: "fc"
+      data1: 2
+      ensm: [0]
+      name: "d0"
+      col_map: 1
+    2: 
+      type: "fc"
+      data1: 2
+      ensm: [1]
+      name: "d1"
+      col_map: 1
+    3: 
+      type: "fc"
+      data1: 2
+      ensm: [2]
+      name: "d2"
+      col_map: 1
+    4: NULL
+  3:
+    1:
+      type: "diff"
+      data1: 2
+      data2: 1
+      ensm: [0]
+      name: "diff"
+      col_map: 2
+    2:
+      type: "diff"
+      data1: 2
+      data2: 1
+      ensm: [1]
+      name: "diff"
+      col_map: 2
+    3:
+      type: "diff"
+      data1: 2
+      data2: 1
+      ensm: [2]
+      name: "diff"
+      col_map: 2
+    4: NULL
+  4: NULL
+
+col_maps:
+  1:
+    name: "precip25"
+  2:
+    name: "diff"
+  3: NULL
+
+
+
