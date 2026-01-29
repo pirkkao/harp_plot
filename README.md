@@ -53,3 +53,8 @@ why by comparing the different configs. You can go through them:
 
 The figures are put into fig-folder, for comparison a ready made
 set of the same figures is provided in fig_examples-folder.
+
+When you want to start exploring data from your own experiments,
+try getting them from ECFS using the get_files.bash script. It
+constructs the file naming so that the harp_plot-scripts know
+what they are searching for.
