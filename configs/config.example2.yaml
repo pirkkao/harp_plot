@@ -9,7 +9,6 @@ data:
     exp:  ["cy49_spp_p01"]
     ensm: [0,1,2]
     flds: ["CLSTEMPERATURE"]
-  2: NULL
 
 times:
   sdate: 2025072412
@@ -54,12 +53,9 @@ plot:
       ensm: [0]
       name: "sdev"
       col_map: 2
-    4: NULL
-  2: NULL
 
 col_maps:
   1:
     name: "t2m_warm"
   2:
     name: "sdev"
-  3: NULL

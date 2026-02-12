@@ -23,7 +23,6 @@ data:
     flds: ["SURFACCPLUIE"]
     decum: true # Decumulate accumulated precipitation,
                 # will only keep last time step data
-  3: NULL
 
 times:
   sdate: 2024082600
@@ -68,7 +67,6 @@ plot:
       ensm: [2]
       name: "d2"
       col_map: 1
-    4: NULL
   2:
     1:
       type: "fc"
@@ -88,7 +86,6 @@ plot:
       ensm: [2]
       name: "d2"
       col_map: 1
-    4: NULL
   3:
     1:
       type: "diff"
@@ -111,8 +108,6 @@ plot:
       ensm: [2]
       name: "diff"
       col_map: 2
-    4: NULL
-  4: NULL
 
 col_maps:
   1:
@@ -120,7 +115,3 @@ col_maps:
   2:
     name: "diff"
     breaks: "c(-8,-5,-4,-3,-2,-1,-0.5,-0.125,0,0.125,0.5,1,2,3,4,5,8)"
-  3: NULL
-
-
-

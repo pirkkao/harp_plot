@@ -17,7 +17,6 @@ data:
     exp: ["meps"]
     ensm: [0]
     flds: ["precipitation_amount_acc"]
-  3: NULL
 
 times:
   sdate: 2024082600
@@ -62,7 +61,6 @@ plot:
       ensm: [0]
       name: "meps"
       col_map: 1
-    4: NULL
   2:
     1:
       type: "diff"
@@ -78,15 +76,12 @@ plot:
       ensm: [0]
       name: "diff"
       col_map: 2
-    3: NULL
-  3: NULL
 
 col_maps:
   1:
     name: "precip15"
   2:
     name: "diff"
-  3: NULL
 
 
 

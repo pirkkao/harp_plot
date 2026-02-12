@@ -17,7 +17,6 @@ data:
     exp:  ["de_fin_noSPP_bnd_9km"]
     ensm: [0,1,2]
     flds: ["SURFACCPLUIE"]
-  3: NULL
 
 times:
   sdate: 2024082600
@@ -62,7 +61,6 @@ plot:
       ensm: [2]
       name: "d2"
       col_map: 1
-    4: NULL
   2:
     1:
       type: "fc"
@@ -82,7 +80,6 @@ plot:
       ensm: [2]
       name: "d2"
       col_map: 1
-    4: NULL
   3:
     1:
       type: "diff"
@@ -105,15 +102,12 @@ plot:
       ensm: [2]
       name: "diff"
       col_map: 2
-    4: NULL
-  4: NULL
 
 col_maps:
   1:
     name: "precip25"
   2:
     name: "diff"
-  3: NULL
 
 
 

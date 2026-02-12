@@ -11,7 +11,7 @@ if [ -z "$check" ]; then
 fi
 
 # Config
-config_file=${1:-"example1"}
+config_file=${1:-"example8"}
 
 export config_file
 

@@ -1,16 +1,25 @@
-library(harp)
-library(dplyr)
-library(patchwork)
-library(stringr)
-library(yaml)
-library(scico)
+# 
+# A plotting interface to harp
+#
 
-# Get local functions
+# Do not load libraries if running interactively
+if (!base::interactive()) {
+    library(harp)
+    library(dplyr)
+    library(patchwork)
+    library(stringr)
+    library(yaml)
+    library(scico)
+    
+    # Get config name from sys
+    config_file<-Sys.getenv("config_file")
+
+} else {
+    # Give config name manually
+    config_file<-"example1"
+}
+# Load local functions
 source("coref.R")
-
-# Get config name or give one locally
-config_file<-Sys.getenv("config_file")
-if(config_file==""){config_file<-"example1"}
 
 # Load exp specific and common templates
 case <- yaml.load_file(paste0("configs/config.",config_file,".yaml"))
@@ -29,6 +38,6 @@ fd <- f_data_diff(fd,config)
 # Plot every figure
 fh <- p_plot_master(fd,config)
 # Arrange figures into rows and columns
-sh <- p_plot_arrange(fh)
+sh <- p_plot_arrange(fh,config)
 # Save the produced figure
 p_save_fig(sh,config)

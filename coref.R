@@ -7,7 +7,7 @@
 ##
 
 f_name <- function(data,ensm) {
-
+    # Construct correct variable name for ensemble member number "ensm"
     if(length(data$fcst_model)==1){
         nam <- paste0(data$fcst_model,"_mbr",sprintf("%03d",ensm))
     } else {
@@ -15,7 +15,21 @@ f_name <- function(data,ensm) {
     }
 
   return(nam)
+}
 
+f_eval_expr <- function(to_eval) {
+    # An aux function that evaluates expression given in
+    # yaml config, e.g. seq(). If a list is given instead that
+    # will be returned.
+
+    # Problem: tryCatch "error=" for some reason only returns
+    # the first element if a yaml list is provided. Create a 
+    # check for list length to prevent this.
+    if (length(to_eval)==1){
+        to_eval<-tryCatch(expr={eval(parse(text=to_eval))},
+                            error=to_eval)
+    }
+    return(to_eval)
 }
 
 ## PARSE CONFIG ##
@@ -23,107 +37,108 @@ f_name <- function(data,ensm) {
 
 f_parse_yaml <- function(exp,cnfg) {
 
-  confs <- list()
-  i <- 1
+    # Create an empty list to fill
+    confs <- list()
 
-  # Loop over items in
-  # data:
-  #   N:
-  while (!is.null(exp$data[[i]])) {
+    # Loop over items in
+    # data:
+    #   i:
+    for (i in 1:length(exp$data)) {
 
-    tmpl <- exp$data[[i]]$tmpl
-    cnfg_tmpl <- cnfg[[tmpl]]
+        # Shorten some names
+        tmpl <- exp$data[[i]]$tmpl
+        cnfg_tmpl <- cnfg[[tmpl]]
 
+        # Create an empty list
+        config <- c()
+
+        # Parse template specific items
+        if (is.null(exp$data[[i]]$file_path)) {
+            config$file_path <-    cnfg_tmpl$file_path
+        } else {
+            config$file_path <-    exp$data[[i]]$file_path
+        }
+        config$file_template <-    cnfg_tmpl$file_template
+        config$exps <-             exp$data[[i]]$exp
+        config$ensm <-             exp$data[[i]]$ensm
+        config$flds <-             exp$data[[i]]$flds
+        config$file_format <-      cnfg_tmpl$file_format
+        config$file_format_opts <- cnfg_tmpl$file_format_opts
+        config$decum<-             exp$data[[i]]$decum
+      
+        # Parse common time items
+        config$sdate <- exp$times$sdate
+        config$lead_times <- exp$times$lead_times
+
+        # Parse subgrid options
+        if(!is.null(exp$grid$subgrid)){
+            config$subgrid <- TRUE
+            config$subgrid_opts <- exp$grid$subgrid
+        } else {
+            config$subgrid <- FALSE
+        }
+
+        # Parse regrid options
+        if(!is.null(exp$grid$regrid)){
+            if((exp$grid$regrid)&(i>1)){
+                config$subgrid <- FALSE
+                config$regrid <- TRUE
+                config$regrid_opts <- ""
+            } else {
+                config$regrid <- FALSE
+            }
+        } else { config$regrid<-FALSE }
+
+        # Add to list
+        confs[[i]] <- config
+    }
+        
+    # Parse plot options
+    #
+    # Loop over items in
+    # plot:
+    #   j:
+    #     k:
+    #
     config <- c()
 
-    # Parse template specific items
-    if (is.null(exp$data[[i]]$file_path)) {
-        config$file_path <-    cnfg_tmpl$file_path
-    } else {
-        config$file_path <-    exp$data[[i]]$file_path
-    }
-    config$file_template <-    cnfg_tmpl$file_template
-    config$exps <-             exp$data[[i]]$exp
-    config$ensm <-             exp$data[[i]]$ensm
-    config$flds <-             exp$data[[i]]$flds
-    config$file_format <-      cnfg_tmpl$file_format
-    config$file_format_opts <- cnfg_tmpl$file_format_opts
-    config$decum<-             exp$data[[i]]$decum
-      
-    # Parse common time items
-    config$sdate <- exp$times$sdate
-    config$lead_times <- exp$times$lead_times
+    for (j in 1:length(exp$plot)) {
+        # Special case for copying the previous rows options
+        if(exp$plot[[j]][[1]]$type=="copy"){
+            config$plot[[j]]<-config$plot[[j-1]]
 
-    # Parse subgrid options
-    if(!is.null(exp$grid$subgrid)){
-      config$subgrid <- TRUE
-      config$subgrid_opts <- exp$grid$subgrid
-    } else {
-      config$subgrid <- FALSE
+        # Normal case, loop over rows and columns
+        } else {
+            config$plot[[j]]      <- exp$plot[[j]]
+
+            for (k in length(exp$plot[[j]])) {
+                config$plot[[j]][[k]] <-          exp$plot[[j]][[k]]
+                config$plot[[j]][[k]]$type <-     exp$plot[[j]][[k]]$type
+                config$plot[[j]][[k]]$data1 <-    exp$plot[[j]][[k]]$data1
+                config$plot[[j]][[k]]$data2 <-    exp$plot[[j]][[k]]$data2
+                config$plot[[j]][[k]]$ensm <-     exp$plot[[j]][[k]]$ensm
+                config$plot[[j]][[k]]$col_tmpl <- exp$plot[[j]][[k]]$col_tmpl
+            }
+        }
     }
 
-    # Parse regrid options
-    if(!is.null(exp$grid$regrid)){
-      if((exp$grid$regrid)&(i>1)){
-        config$subgrid <- FALSE
-        config$regrid <- TRUE
-        config$regrid_opts <- ""
-      } else {
-        config$regrid <- FALSE
-      }
-    } else { config$regrid<-FALSE }
-
-    #print(config)
-    confs[[i]] <- config
-
-    #print(i)
-    i<-i+1
-    
-  }
-        
-  # Parse plot options
-    
-  # Loop over items in
-  # plot:
-  #   j:
-  #     k:
-  #
-  config <- c()
-  j<-1
-  while (!is.null(exp$plot[[j]])) {
-    if(exp$plot[[j]][[1]]$type=="copy"){
-      config$plot[[j]]<-config$plot[[j-1]]
-    } else {
-      config$plot[[j]]      <- exp$plot[[j]]
-      k<-1
-      while (!is.null(exp$plot[[j]][[k]])) {
-        config$plot[[j]][[k]] <-          exp$plot[[j]][[k]]
-        config$plot[[j]][[k]]$type <-     exp$plot[[j]][[k]]$type
-        config$plot[[j]][[k]]$data1 <-    exp$plot[[j]][[k]]$data1
-        config$plot[[j]][[k]]$data2 <-    exp$plot[[j]][[k]]$data2
-        config$plot[[j]][[k]]$ensm <-     exp$plot[[j]][[k]]$ensm
-        config$plot[[j]][[k]]$col_tmpl <- exp$plot[[j]][[k]]$col_tmpl
-        k<-k+1
-      }
+    # Collect requested color maps
+    for (j in 1:length(exp$col_maps)) {
+        config$col_maps[[j]]<-              exp$col_maps[[j]]
+        config$col_maps[[j]]$name <-        exp$col_maps[[j]]$name
+        config$col_maps[[j]]$colours <-     exp$col_maps[[j]]$colours
+        config$col_maps[[j]]$direction <-   exp$col_maps[[j]]$direction
+        config$col_maps[[j]]$limits <-      exp$col_maps[[j]]$limits
+        config$col_maps[[j]]$break_steps <- exp$col_maps[[j]]$break_steps
     }
-    j<-j+1
-  }
-  j<-1
-  while (!is.null(exp$col_maps[[j]])) {
-      config$col_maps[[j]]<-              exp$col_maps[[j]]
-      config$col_maps[[j]]$name <-        exp$col_maps[[j]]$name
-      config$col_maps[[j]]$colours <-     exp$col_maps[[j]]$colours
-      config$col_maps[[j]]$direction <-   exp$col_maps[[j]]$direction
-      config$col_maps[[j]]$limits <-      exp$col_maps[[j]]$limits
-      config$col_maps[[j]]$break_steps <- exp$col_maps[[j]]$break_steps
-      j<-j+1
-  }
-  config$opts <- exp$opts
-  config$fill <- cnfg$fill
-      
-  confs[[i]] <- config
+    # Copy every item from opts and fill
+    config$opts <- exp$opts
+    config$fill <- cnfg$fill
+
+    # Add to list
+    confs[[i+1]] <- config
     
-  return(confs)
+    return(confs)
 
 }
 
@@ -136,64 +151,76 @@ f_parse_yaml <- function(exp,cnfg) {
 #
 f_load_data <- function(cnfg,fld,expe,regrid_file) {
 
-  # Add options for transformation if requested
-  #
-  transf<-"none"
-  transf_opts<-""
-  if (cnfg$subgrid) {
-    transf<-"subgrid"
-    transf_opts<-paste0("subgrid_opts(",paste(cnfg$subgrid_opts,collapse=","),")")
-  } else if (cnfg$regrid) {
-    transf<-"regrid"
-    transf_opts<-paste0("regrid_opts(get_domain(regrid_file))")
-  }
+    # Add options for transformation if requested
+    #
+    transf<-"none"
+    transf_opts<-""
+    do_transf<-FALSE
+    
+    if (cnfg$subgrid) {
+    #transf<-"subgrid"
+    #transf_opts<-paste0("subgrid_opts(",paste(cnfg$subgrid_opts,collapse=","),")")
+        do_transf<-TRUE
+        do_transf_opts<-paste0("geo_subgrid(ff,",paste(cnfg$subgrid_opts,collapse=","),")")
+    } else if (cnfg$regrid) {
+        transf<-"regrid"
+        transf_opts<-paste0("regrid_opts(get_domain(regrid_file))")
+    }
 
-  # Issues with quotation marks not evaluated from yaml
-  file_format<-NULL
-  file_format_opts<-list()
-  if (cnfg$file_format!="") {
-    file_format<-cnfg$file_format
-    file_format_opts<-cat(cnfg$file_format_opts,"\n")
-  }
+    # Issues with quotation marks not evaluated from yaml
+    file_format<-NULL
+    file_format_opts<-list()
+    if (cnfg$file_format!="") {
+        file_format<-cnfg$file_format
+        file_format_opts<-cat(cnfg$file_format_opts,"\n")
+    }
 
-  if (FALSE) {
-    print(cnfg$sdate)
-    print(expe)
-    print(cnfg$lead_times)
-    print(cnfg$ensm)
-    print(cnfg$file_path)
-    print(cnfg$file_template)
-    print(fld)
-    print(file_format)
-    print(file_format_opts)
-    print(transf)
-    print(transf_opts)
-    print(eval(parse(text=transf_opts)))
-  }
+    # Parse forecast lengths if they are given as seq()
+    lead_times<-f_eval_expr(cnfg$lead_times)
+    
+    if (FALSE) {
+        print(cnfg$sdate)
+        print(expe)
+        print(cnfg$lead_times)
+        print(cnfg$ensm)
+        print(cnfg$file_path)
+        print(cnfg$file_template)
+        print(fld)
+        print(file_format)
+        print(file_format_opts)
+        print(transf)
+        print(transf_opts)
+        print(eval(parse(text=transf_opts)))
+    }
+    
+    # Fetch data
+    #
+    ff <- read_forecast(
+        cnfg$sdate,
+        fcst_model = expe,
+        lead_time = lead_times,
+        members = cnfg$ensm,
+        file_path = cnfg$file_path,
+        file_template=cnfg$file_template,
+        parameter=fld,
+        file_format=file_format,
+        file_format_opts=file_format_opts,
+        transformation=transf,
+        transformation_opts=eval(parse(text=transf_opts)),
+        return_data=TRUE
+    )
+
+    # Do subgrid if requested
+    if (do_transf){
+        ff<-eval(parse(text=do_transf_opts))
+    }
+    
+    # Scale temp to celcius
+    if (fld == "SURFTEMPERATURE" || fld == "CLSTEMPERATURE" || fld == "t2m" || fld == "air_temperature_2m") {
+        ff <- ff |> scale_param(-273.15,"degC")
+    }
   
-  # Fetch data
-  #
-  ff <- read_forecast(
-  cnfg$sdate,
-  fcst_model = expe,
-  lead_time = cnfg$lead_times,
-  members = cnfg$ensm,
-  file_path = cnfg$file_path,
-  file_template=cnfg$file_template,
-  parameter=fld,
-  file_format=file_format,
-  file_format_opts=file_format_opts,
-  transformation=transf,
-  transformation_opts=eval(parse(text=transf_opts)),
-  return_data=TRUE
-  )
-  
-  # Scale temp
-  if (fld == "SURFTEMPERATURE" || fld == "CLSTEMPERATURE" || fld == "t2m" || fld == "air_temperature_2m") {
-    ff <- ff |> scale_param(-273.15,"degC")
-  }
-  
-  return (ff)
+    return (ff)
 }
 
 
@@ -204,49 +231,71 @@ f_load_data <- function(cnfg,fld,expe,regrid_file) {
 #
 f_data_layer <- function(config) {
 
+    # Collect data items into a list
+    f <- list()
 
-  f <- list()
+    idx <- 1
+    i <- 1
+    # Config elements before the last refer to data
+    while (idx <= length(config)-1) {
 
-  idx <- 1
-  i <- 1
-  while (idx <= length(config)-1) {
+        # Check for regrid, need to give the geofield to f_load_data if requested
+        if ((idx>1) & (config[[idx]]$regrid)) {
+            regrid_file=f[[1]][[f_name(f[[1]],config[[1]]$ensm[1])]]
+        } else {
+            regrid_file=NULL
+        }
 
-    # Check for regrid
-    if ((idx>1) & (config[[idx]]$regrid)) {
-      regrid_file=f[[1]][[f_name(f[[1]],config[[1]]$ensm[1])]]
-    } else {
-      regrid_file=NULL
+        # Loops for multiple parameter fetches and multiple exp fetches.
+        # NOT TESTED, should work in theory though...
+        for (fld in config[[idx]]$flds) {
+            for (expe in config[[idx]]$exps) {
+
+                f[[i]] <- f_load_data(config[[idx]],fld,expe,regrid_file)
+                i<-i+1
+            }
+        }
+        idx<-idx+1
     }
-
-    for (fld in config[[idx]]$flds) {
-      for (expe in config[[idx]]$exps) {
-
-        f[[i]] <- f_load_data(config[[idx]],fld,expe,regrid_file)
-        i<-i+1
-      }
-    }
-    #print(idx)
-    idx<-idx+1
-  }
-
-  return (f)
+    return (f)
 }
 
 f_decum <- function(f,config){
+    # Decumulate the forecast fields.
 
+    # Loop over each opened data source
     for(i in 1:(length(config)-1)){
-        ftemp <- f[[i]] |> filter(lead_time==config[[i]]$lead_times[2])
-        if(!is.null(config[[i]]$decum)){
-            if(config[[i]]$decum){
-                decum_t<-config[[i]]$lead_times[2]-config[[i]]$lead_times[1]
-                ftemp <- f[[i]] |> decum(decum_t)
-                ftemp <- ftemp |> filter(lead_time==config[[i]]$lead_times[2])
-                
-                f[[i]] <- ftemp
+        
+        # Parse forecast lengths if they are given as seq()
+        lead_times<-f_eval_expr(config[[i]]$lead_times)
+
+        # Skip if only a single lead time is requested
+        if (length(lead_times!=1)) {
+
+            # Check if decumulation is requested
+            if(!is.null(config[[i]]$decum)){
+                if(config[[i]]$decum){
+                        
+                    # Assume the lead_times are evenly timed and use a decum 
+                    # length for each lead time.
+                    decum_t<-lead_times[[2]]-lead_times[[1]]
+                    ftemp <- f[[i]] |> decum(decum_t)
+
+                    # For some reason, saving f[[i]]<-f[[i]] |>decum did not work.
+                    # Drop 1st lead_time since it's not decumulated.
+                    f[[i]] <- ftemp |> filter(lead_time>lead_times[[1]])
+                }
             }
         }
     }
-
+            # !COULD NOT GET MERGING OF DF TO WORK, COMMENTED OUT!
+            # For uneven lead times, loop over other forecast lead times
+            # and do a difference between i+1'th and i'th lead time
+            #for (ifclen in 2:length(lead_times)) {
+            #    ftemp <- f[[i]] |> filter(lead_time==lead_times[[ifclen-1]])
+            #
+            #    # Calculate decumation time and then apply decum
+            #    ftemp <- ftemp - f[[i]] |> filter(lead_time==lead_times[[ifclen]])
     return(f)
 }
 
@@ -254,7 +303,9 @@ f_data_diff <- function(f,config){
 
     # Copy base for data frame, remove unncessary elements
     # (probably not the best way to do this, but do not know
-    #  how else to do it)
+    #  how else to do it).
+    # Need to have this so we can add the difference field to it
+    # as g$diff.
     g<-f[[1]]
     for(idx in config[[1]]$ensm){
         g<-g[,! names(g) %in% f_name(g,idx), drop=F ]
@@ -263,20 +314,28 @@ f_data_diff <- function(f,config){
     # Make difference fields if requested
     plt<-last(config)$plot
     addElem<-FALSE
+
+    # Loop over the rows and columns of plot:i:j
     for (i in 1:length(plt)){
-        j<-1
-        while(!is.null(plt[[i]][[j]])) {
+        for(j in 1:length(plt[[i]])) {
+            
+            # Check if diff is requested
             if(plt[[i]][[j]]$type=="diff"){
                 addElem<-TRUE
                 d1<-plt[[i]][[j]]$data1
                 d2<-plt[[i]][[j]]$data2
+
+                # When taking difference between ensemble members, go here
                 if(d1==d2){
                     for(k in plt[[i]][[j]]$ensm){
                         # Only diff for ensm>0
+                        # NEED TO REVISIT THIS, maybe taking diff between other members needed?
                         if(k>0) {
                             g[[paste0("diff_",k,d1,d2)]]<-f[[d1]][[f_name(f[[d1]],k)]]-f[[d1]][[f_name(f[[d1]],0)]]
                         }
                     }
+                # When taking difference between different data sources, go here.
+                # For ensemble stats, calculate the stats before taking diff.
                 } else {
                     for(k in plt[[i]][[j]]$ensm){
                         if(k=="ens_mean"){
@@ -289,9 +348,9 @@ f_data_diff <- function(f,config){
                     }
                 }
             }
-            j<-j+1
         }
     }
+    # Only add an element to the data list if a difference field was made here
     if(addElem){
         f[[length(f)+1]]<-g
     }
@@ -306,35 +365,33 @@ f_data_diff <- function(f,config){
 
 p_plot_master <- function(f,config) {
 
-  fh<-list()
-  i<-1
-
+    fh<-list()
     
-  # Create colormap setup
-
-  sfill<-p_colmap_setup(last(config))
+    # Create colormap setup
+    colmaps<-p_colmap_setup(last(config))
     
-  # Basic plots
-  for(i in 1:length(last(config)$plot)) {
+    # Cycle through the requested rows
+    for(i in 1:length(last(config)$plot)) {
 
-    fh[[i]]<-p_plot_layer(f,last(config)$plot[[i]],sfill)
+        fh[[i]]<-p_plot_layer(f,last(config)$plot[[i]],colmaps)
+        i<-i+1
+    }
     
-    i<-i+1
-  }
-
-  # Difference plots
-  #if(config
-    
-  return(fh)
+    return(fh)
 }
 
 p_colmap_setup <- function(cconfig) {
 
     # Create requested color maps
-
+    #
     sfill<-list()
+    legend<-list()
     fm<-cconfig$fill
-    
+
+    # Cycle through the requested color maps and construct
+    # necessary input for the scale_fill_template-function.
+    # If no specifications are done in the experiment yaml,
+    # use presetup values from the common yaml.
     for (i in 1:length(cconfig$col_maps)) {
 
         cm<-cconfig$col_maps[[i]]
@@ -345,57 +402,62 @@ p_colmap_setup <- function(cconfig) {
         } else {
             method<-cm$type
         }
-
         # Colour
         if (is.null(cm$colours)) {
             colours<-fm[[cm$name]]$colours
         } else {
             colours<-cm$colours
         }
-
         # Direction
         if (is.null(cm$direction)) {
             direction<-fm[[cm$name]]$direction
         } else {
             direction<-cm$direction
         }
-        
         # Limits
         if (is.null(cm$limits)) {
             limits <- fm[[cm$name]]$limits
         } else {
             limits <- paste0("c(",cm$limits[[1]],",",cm$limits[[2]],")")
         }
-
         # Breaks
         if (is.null(cm$breaks)) {
             breaks<-fm[[cm$name]]$breaks
         } else {
             breaks<-cm$breaks
         }
-        
         # Other options
         if (is.null(cm$opts)) {
             opts<-fm[[cm$name]]$opts
         } else {
             opts<-cm$opts
         }
+        # Generate the colour map
         sfill[[i]]<-scale_fill_template(method,colours,direction,limits,breaks)
-    }
-    
-    return(sfill)
 
+        # Also get legend name associated with that colour map here
+        if (is.null(cm$legend)) {
+            legend[[i]]<-fm[[cm$name]]$legend
+        } else {
+            legend[[i]]<-cm$legend
+        }
+    }
+    return(list(sfill,legend))
 }
 
 
-p_plot_layer <- function(f,cconfig,sfill) {
+p_plot_layer <- function(f,cconfig,colmaps) {
 
     fhh<-list()
     i<-1
     idx<-1
-    
-    while(!is.null(cconfig[[idx]])) {
+    sfill<-colmaps[[1]]
+    legend<-colmaps[[2]]
 
+    # Cycle through the requested columns to be plotted
+    for(idx in 1:length(cconfig)) {
+
+        # Shorten often used variables
         plt <- cconfig[[idx]]
         ff<- f[[plt$data1]]
         
@@ -405,37 +467,55 @@ p_plot_layer <- function(f,cconfig,sfill) {
         } else {
             cmap<-NULL
         }
-        #print(cmap)
+
+        # Create displayed text to plot.
+        # NOTE! Could not get facet_wrap to function as wanted so
+        # doing this workaround.
+        title=NULL
         
-        #print(plt$type)
         if(plt$type=="fc"){
             for(ensm in plt$ensm) {
                 ffname <- f_name(ff,ensm)
-                #print(ffname)
-                fhh[[i]] <- plot(ff,!!sym(ffname))+labs(fill=paste0(plt$name,ensm))+cmap
+                title<-p_plot_title(ff,plt,ensm)
+                
+                fhh[[i]] <- plot(ff,!!sym(ffname))+labs(fill=legend,title=title)+cmap+
+                            theme(plot.title=element_text(hjust=0.5))
                 i<-i+1
             }
         } else if(plt$type=="ens_mean") {
-            fhh[[i]] <- plot(ens_stats(ff),"ens_mean")+labs(fill=paste0(plt$name))+cmap
+            title<-p_plot_title(ff,plt)
+            fhh[[i]] <- plot(ens_stats(ff),"ens_mean")+labs(fill=legend,title=title)+cmap+
+                        theme(plot.title=element_text(hjust=0.5))
             i<-i+1
         } else if(plt$type=="ens_sd") {
-            fhh[[i]] <- plot(ens_stats(ff),"ens_sd")+labs(fill=paste0(plt$name))+cmap
+            title<-p_plot_title(ff,plt)
+            fhh[[i]] <- plot(ens_stats(ff),"ens_sd")+labs(fill=legend,title=title)+cmap+
+                        theme(plot.title=element_text(hjust=0.5))
             i<-i+1
         } else if(plt$type=="diff") {
+            title<-p_plot_title(ff,plt)
+            # Diff fields should be in the last data element
             ff<-last(f)
             d1<-plt$data1
             d2<-plt$data2
+
+            # Separate into same data diff and not because of ctrl member treatment.
+            # NEED TO REVISIT THIS.
             if(d1==d2){
                 for(k in plt$ensm){
                     # Only diff for ensm>0
                     if(k>0) {
-                        fhh[[i]] <- plot(ff,!!sym(paste0("diff_",k,d1,d2)))+cmap
+                        fhh[[i]] <- plot(ff,!!sym(paste0("diff_",k,d1,d2)))+
+                                    labs(fill=legend,title=title)+cmap+
+                                    theme(plot.title=element_text(hjust=0.5))
                         i<-i+1
                     }
                 }
             } else {
                 for(k in plt$ensm){
-                    fhh[[i]] <- plot(ff,!!sym(paste0("diff_",k,d1,d2)))+cmap
+                    fhh[[i]] <- plot(ff,!!sym(paste0("diff_",k,d1,d2)))+
+                                labs(fill=legend,title=title)+cmap+
+                                theme(plot.title=element_text(hjust=0.5))
                     i<-i+1
                 }
             }
@@ -446,10 +526,34 @@ p_plot_layer <- function(f,cconfig,sfill) {
     return(fhh)
 }
 
+p_plot_title <- function(ff,plt,ensm="") {
 
-p_plot_arrange <- function(fh) {
- 
-  sh<-list()
+    title<-NULL
+    exp<-   ""
+    mbr<-   ""
+    lead<-  ""
+    # Construct a title for a plot based on keywords.
+    # NEED TO BE EXPANDED.
+    if(!is.null(plt$name)){
+        for (item in plt$name) {
+            if (item=="member") {
+                mbr<-paste0("mbr",ensm)
+            } else if (item=="lead_time") {
+                lead<-paste0("+",ff$lead_time,"h")
+            } else {
+                exp<-item
+            }
+        }
+        title<-paste(exp,mbr,lead," ")
+    }
+    return(title)
+}
+    
+    
+p_plot_arrange <- function(fh,config) {
+
+    # Create the full subplot row by row
+    sh<-list()
     for(i in 1:length(fh)) {
         first<-TRUE
         shh<-fh[[i]][[1]]
@@ -459,8 +563,16 @@ p_plot_arrange <- function(fh) {
             }
         }
         sh[[i]]<-shh+plot_layout(ncol=j)
+        
+        # Check if guides are to be collected
+        if(!is.null(last(config)$opts$collect_guides)){
+            if(last(config)$opts$collect_guides){
+                sh[[i]]<-sh[[i]]+plot_layout(guides = "collect")
+            }
+        } 
     }
 
+    # Stack the rows in vertical
     if(length(sh)==1){
         s<-sh[[1]]
     } else if(length(sh)==2) {
@@ -481,7 +593,7 @@ p_save_fig <- function(fh,config){
 
     # Get values from opts if given
     opts<-last(config)$opts
-    #print(opts)
+
     if (!is.null(opts$fig_name)){fig_name<-opts$fig_name}
     if (!is.null(opts$fig_size)){fig_size<-opts$fig_size}
 

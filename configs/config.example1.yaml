@@ -9,7 +9,6 @@ data:
     exp:  ["cy49_spp_p01"]
     ensm: [0]
     flds: ["CLSTEMPERATURE"]
-  2: NULL
 
 times:
   sdate: 2025072412
@@ -40,22 +39,20 @@ plot:
       type: "fc"
       data1: 1
       ensm: [0]
-      name: "mbr"
+      name: 
       col_map: 
     2:
       type: "fc"
       data1: 1
       ensm: [0]
-      name: "mbr"
+      name: 
       col_map: 1
     3:
       type: "fc"
       data1: 1
       ensm: [0]
-      name: "mbr"
+      name: 
       col_map: 2
-    4: NULL
-  2: NULL
 
 col_maps:
   1:
@@ -63,4 +60,3 @@ col_maps:
   2:
     name: "t2m_warm"
     breaks: "seq(10,35,5)"
-  3: NULL

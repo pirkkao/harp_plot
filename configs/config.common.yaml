@@ -32,6 +32,7 @@ fill:
     direction: -1
     limits: "c(0,10)"
     breaks: "seq(0,6,0.5)"
+    legend: "sdev"
     
   diff:
     type: scale_fill_stepsn
@@ -39,6 +40,7 @@ fill:
     direction: 1
     limits: "c(-15,15)"
     breaks: "seq(-15,15,3)"
+    legend: "diff"
 
   t2m_warm:
     type: scale_fill_stepsn
@@ -46,6 +48,7 @@ fill:
     direction: -1
     limits: "c(5,45)"
     breaks: "seq(5,45,4)"
+    legend: "t2m" # bquote(\"[\"*degree*C*\"]\")"
     
   t2m_cold:
     type: scale_fill_stepsn
@@ -53,7 +56,17 @@ fill:
     direction: 1
     limits: "c(-30,-5)"
     breaks: "seq(-30,-5,-5)"
+    legend: "t2m" #"bquote(\"[\"*degree*C*\"]\")"
 
+  precip5:
+    type: scale_fill_stepsn
+    colours: "oslo"
+    direction: -1
+    limits: "c(0.125,5)"
+    breaks: "seq_double(0.125,5)"
+    opts: ",trans=\"log\",begin=0.2"
+    legend: "[mm]/x[h]"
+    
   precip15:
     type: scale_fill_stepsn
     colours: "oslo"
@@ -61,6 +74,7 @@ fill:
     limits: "c(0.125,15)"
     breaks: "seq_double(0.125,15)"
     opts: ",trans=\"log\",begin=0.2"
+    legend: "[mm]/x[h]"
 
   precip25:
     type: scale_fill_stepsn
@@ -69,3 +83,4 @@ fill:
     limits: "c(0.125,25)"
     breaks: "seq_double(0.125,25)"
     opts: ",trans=\"log\",begin=0.2"
+    legend: "[mm]/x[h]"

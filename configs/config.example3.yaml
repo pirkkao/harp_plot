@@ -19,9 +19,6 @@ data:
     exp:  ["cy46_spp_p01_fix2"]
     ensm: [0,1,2]
     flds: ["SURFTEMPERATURE"]
-  3: NULL
-  4:
-  5:
 
 times:
   sdate: 2025072412
@@ -52,7 +49,7 @@ plot:
       type: "fc"
       data1: 1
       ensm: [0,1]
-      name: "mbr"
+      name: "member"
       col_map: 1
     2:
       type: "ens_mean"
@@ -64,7 +61,6 @@ plot:
       data1: 1
       name: "enssd"
       col_map: 4
-    4: NULL
   2:
     1:
       type: "copy" # This copies the first row setup
@@ -99,8 +95,6 @@ plot:
       ensm: ["ens_sd"]
       name: "diff"
       col_map: 3
-    5: NULL
-  4: NULL
 
 col_maps:
   1:
@@ -115,4 +109,3 @@ col_maps:
   4:
     name: "sdev"
     breaks: "c(0.1, 0.2, 0.3, 0.5, 1, 1.5, 2)" # A list of vals
-  5: NULL
