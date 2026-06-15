@@ -1,7 +1,8 @@
 This is an R-package designed to make harp-plotting quicker and easier 
 via adding a yaml controlled configuration. You don't need to know 
 R in order to use this, all that is done behind the scenes via 
-R-functions and programs.
+R-functions and programs. Some example plots are provided after the 
+instructions.
 
 In order to use this, the following R-packages need to be installed
 in your local R-installation:
@@ -39,16 +40,20 @@ this program either from command line (1) or from R (2):
    config_file<-"CONFIG_NAME"
    source("plot_fields.R")
 
+Note for option 2 you need to manually load in the libraries first,
+this choice was made so that when rerunning the scripts in R
+no library loading happens.
+
 Some example configurations are provided in configs. These
-use data from /ec/scratch/fi3/investigation/..." that should
+use data from /perm/fi3/data_examples/..." that should
 be visible for "accord" user group.
 
 The example configuration headers provide a bit of information
 what the example is trying to illustrate, try running all 7
 examples and see for yourself what happens and try to understand
 why by comparing the different configs. You can go through them:
-./master.bash example1
-./master.bash example2
+./master.bash example_det1
+./master.bash example_det2
 ...
 
 The figures are put into fig-folder, for comparison a ready made
@@ -58,3 +63,25 @@ When you want to start exploring data from your own experiments,
 try getting them from ECFS using the get_files.bash script. It
 constructs the file naming so that the harp_plot-scripts know
 what they are searching for.
+
+Example plots (included in the example config-files):
+**Visualizing determistic forecasts example 1**
+![Visualizing determistic forecasts example 1](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_det1.png)
+
+**Visualizing determistic forecasts example 2**
+![Visualizing determistic forecasts example 2](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_det2.png)
+
+**Visualizing determistic forecasts example 3**
+![Visualizing determistic forecasts example 3](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_det3.png)
+
+**Visualizing determistic forecasts example 1**
+![Visualizing determistic forecasts example 4](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_det4.png)
+
+**Visualizing ensemble products example 1**
+![Visualizing ensemble products example 1](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_eps1.png)
+
+**Visualizing ensemble products example 2**
+![Visualizing ensemble products example 2](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_eps2.png)
+
+**Visualizing ensemble products example 3**
+![Visualizing ensemble products example 3](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_eps32025012112+12h.png)
