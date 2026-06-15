@@ -65,6 +65,7 @@ constructs the file naming so that the harp_plot-scripts know
 what they are searching for.
 
 Example plots (included in the example config-files):
+
 **Visualizing determistic forecasts example 1**
 ![Visualizing determistic forecasts example 1](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_det1.png)
 
@@ -84,4 +85,4 @@ Example plots (included in the example config-files):
 ![Visualizing ensemble products example 2](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_eps2.png)
 
 **Visualizing ensemble products example 3**
-![Visualizing ensemble products example 3](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_eps32025012112+12h.png)
+![Visualizing ensemble products example 3](https://github.com/pirkkao/harp_plot/blob/main/fig_examples/example_eps3_2025012112+12h.png)
