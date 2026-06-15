@@ -1,0 +1,188 @@
+#
+# DETERMINISTIC FC PLOTTING EXAMPLE 2:
+# data operations 1.
+#
+# Load in multiple fields from 1 data source. Currently a
+# a limited number of operations are available fo for the
+# fields, one of them being a root of sum of squares ("rms").
+# Here, first we use this operation to calculate wind speed
+# from u and v. After this we also load in accumulated
+# precipitation field and use the "decum" option to decumulate
+# the accumulation period to wanted length. Enabling this will
+# result in the script fetcing one additional file corresponding
+# to the needed forecast length.
+#
+# More detailed comments:
+#
+# Even though adding more operations is easy, due to the field
+# name handling by R/harp the field names need an addition to
+# the plotting part. This could probably be circumvented by
+# using a standard experiment name for the fields?
+#
+# This example also illustrates how overlaying multiple fields
+# in the same figure works. This is done via the "share_frame"
+# functionality configured here. Behind the scenes this uses
+# the "geom_georaster()" to include an additional field on top
+# of the normal "plot()". In order to hide colorbars in a case
+# where a lot of fields are stacked, use guide="none" in the
+# colormap configuration as shown here.
+#
+# The normal contour line plotting is done via geom_geocontour()
+# and the colourmap handling is a bit different here as the line
+# options need to be fed directly into the function, and not post
+# plotting via +cmap.
+#
+data:
+  1:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0]
+    flds: ["CLSVENT.ZONAL"]
+    operate_on: 2
+    operate_type: "rms"
+  2:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0]
+    flds: ["CLSVENT.MERIDIEN"]
+  3:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0]
+    flds: ["MSLPRESSURE"]
+  4:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0]
+    flds: ["SURFNEBUL.TOTALE"]
+  5:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0]
+    flds: ["SURFACCPLUIE"]
+    decum: 6 # Decumulate to N latest hours
+  6:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0]
+    flds: ["SURFACCNEIGE"]
+    decum: 6 # Decumulate to N latest hours
+  7:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0]
+    flds: ["SURFACCGRAUPEL"]
+    decum: 6 # Decumulate to N latest hours
+    
+times:
+  sdate: 2025012112
+  lead_times: [12]
+
+grid:
+  subgrid:
+  regrid:
+
+opts:
+  fig_name: "fig/example_det2.png"
+  fig_size: [10,6,300] # Heigh,width,dpi
+  collect_guides:
+
+# plot:
+#   row1:
+#     column1:
+#       ...
+#     column2:
+#       ...
+#   row2:
+#     column1:
+#       ...
+#     column2:
+#       ...
+plot:
+  1:
+    1:
+      type: "fc_rms"
+      data1: 1
+      ensm: [0]
+      name: ["UWC","member", "lead_time"]
+      col_map: 1
+      share_frame: 1
+    2:
+      type: "fc"
+      data1: 3
+      ensm: [0]
+      name: 
+      col_map: 2
+      share_frame: 1
+      contour: true   
+    3:
+      type: "fc"
+      data1: 4
+      ensm: [0]
+      name: 
+      col_map: 3
+      share_frame: 2
+    4:
+      type: "fc"
+      data1: 5
+      ensm: [0]
+      name: 
+      col_map: 4
+      share_frame: 2
+    5:
+      type: "fc"
+      data1: 6
+      ensm: [0]
+      name: 
+      col_map: 5
+      share_frame: 2
+    6:
+      type: "fc"
+      data1: 7
+      ensm: [0]
+      name: 
+      col_map: 6
+      share_frame: 2
+    7:
+      type: "fc"
+      data1: 3
+      ensm: [0]
+      name: 
+      col_map: 7
+      share_frame: 2
+      contour: true   
+      
+col_maps:
+  1:
+    name: 'scale_fill_stepsn(colours=scico(54,palette="acton",direction=-1,begin=0),limits=c(0,35),breaks=c(0,5,10,15,20,25,30,35))'
+    legend: "wind"
+  2:
+    name: "contour"
+    colours: "blue"
+    limits:
+    break_steps:
+    legend: "hide"
+    alpha: 0.3
+    upscale: 3
+    linewidth: 1.01
+  3:
+    name: 'scale_fill_stepsn(colours=scico(54,palette="grayC",direction=-1,begin=0.3),limits=c(0.625,1),breaks=c(0.625,0.75,0.875,1.0),na.value="transparent",oob=scales::censor)'
+    legend: "cctot"
+  4:
+    name: "scale_fill_precip_b()"
+    legend:
+  5:
+    name: 'scale_fill_stepsn(colours=scico(54,palette="bamako",direction=-1,begin=0.2),trans="log",na.value="transparent",breaks=seq_double(0.125,32),limits=c(0.125,32),oob=scales::censor,guide="none")'
+    legend:
+  6:
+    name: 'scale_fill_stepsn(colours=scico(54,palette="acton",direction=-1,begin=0.2),trans="log",na.value="transparent",breaks=seq_double(0.125,32),limits=c(0.125,32),oob=scales::censor,guide="none")'
+    legend:
+  7:
+    name: "contour"
+    colours: "white"
+    limits:
+    break_steps:
+    legend: "hide"
+    alpha: 0.4
+    upscale: 2
+    linewidth: 1.02

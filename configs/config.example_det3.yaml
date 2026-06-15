@@ -1,0 +1,197 @@
+#
+# DETERMINISTIC FC PLOTTING  EXAMPLE 3:
+# plotting tif format and different initilization times
+#
+# Here we load in 3 instances of Deode forecasts valid at the same
+# time. The loaded fields are the lake-map, acc precipitation and
+# diagnosted lightning occurance. A radar composite is plotted along
+# with the forecast fields. This is constructed from tif-images
+# containing 24h acc precipitation fields calculated from the radar
+# reflectivities.
+#
+# When requesting multiple fields to be loaded in, the program
+# splits them into different entry points after the retrieval. That
+# is why in the plotting part, the data entries for the first file
+# refer to these fields as 1-3, for data: 2: as 4-6, and for data: 3:
+# as 7-9. One could just as well load the data in as separate entries
+# as well, i.e.
+#
+# data:
+#   1:
+#     ...
+#     flds: ["SURFIND.TERREMER"]
+#     ...
+#   2:
+#     ...
+#     flds: ["SURFACCPLUIE"]
+#     ...
+#
+# More detailed comments:
+#
+# Tif-handling is only working in R/4.4.3 on ATOS, or at least I
+# could not get the proper R libraries to install in R/4.3.3.
+# Furthermore, the tif-handling is rather straightforward, but
+# there is a clash in used functions between harp and the tif
+# libraries and therefore the plotting is handled in a separate
+# function collection. If tif-plotting is requested, these libraries
+# are temporarily loaded in and after that plotting is done the
+# libraries are swithched back to the harp requested ones.
+#
+# Normally using the decumulation functionality requires the user
+# to load these in as different entries, otherwise the instantaneous
+# fields would have the decum h fields substracted from them as well.
+# I coded an expection for the lake-mask fields, that is why the
+# example loads them in with the same structure.
+# 
+#
+data:
+  1:
+    tmpl: local_fa_ml
+    exp:  ["de_fin_17SPP_bnd_9km_userefdata"]
+    ensm: [0]
+    flds: ["SURFIND.TERREMER","SURFACCPLUIE","SURFDIAG.FLASH"]  
+    decum: 12 # Decumulate to N latest hours
+  2:
+    tmpl: local_fa_ml
+    exp:  ["de_fin_17SPP_bnd_9km_userefdata"]
+    ensm: [0]
+    flds: ["SURFIND.TERREMER","SURFACCPLUIE","SURFDIAG.FLASH"]
+    sdate: 2024082612
+    lead_times: 32
+    decum: 12 # Decumulate to N latest hours
+  3:
+    tmpl: local_fa_ml
+    exp:  ["de_fin_17SPP_bnd_9km_userefdata"]
+    ensm: [0]
+    flds: ["SURFIND.TERREMER","SURFACCPLUIE","SURFDIAG.FLASH"]
+    sdate: 2024082700
+    lead_times: 20
+    decum: 12 # Decumulate to N latest hours
+
+times:
+  sdate: 2024082600
+  lead_times: 44
+
+grid:
+  subgrid: [250,850,250,850]
+  regrid: 
+
+opts:
+  fig_name: "fig/example_det3.png"
+  fig_size: [8,10,300] # Heigh,width,dpi
+  collect_guides: false
+
+# plot:
+#   row1:
+#     column1:
+#       ...
+#     column2:
+#       ...
+#   row2:
+#     column1:
+#       ...
+#     column2:
+#       ...
+plot:
+  1:
+    1:
+      type: "radar"
+      data1: "/perm/fi3/data_examples/202408270800_acc24h_cumul.tif"
+      data2: "/perm/fi3/data_examples/202408272000_acc24h_cumul.tif"
+      name: "radar"
+      col_map: 1
+      share_frame:
+    2:
+      type: "fc"
+      data1: 1
+      ensm: [0]
+      name: ["17SPP","member", "lead_time"]
+      col_map: 2
+      share_frame: 2
+    3:
+      type: "fc"
+      data1: 2
+      ensm: [0]
+      name: ["17SPP","member", "lead_time"]
+      col_map: 3
+      share_frame: 2
+    4:
+      type: "fc"
+      data1: 3
+      ensm: [0]
+      name: ["17SPP","member", "lead_time"]
+      col_map: 4
+      share_frame: 2    
+  2:
+    1:
+      type: "radar"
+      data1: "/perm/fi3/data_examples/202408270800_acc24h_cumul.tif"
+      data2: "/perm/fi3/data_examples/202408272000_acc24h_cumul.tif"
+      name: "radar"
+      col_map: 1
+      share_frame:
+    2:
+      type: "fc"
+      data1: 4
+      ensm: [0]
+      name: ["17SPP","member", "lead_time"]
+      col_map: 2
+      share_frame: 2
+    3:
+      type: "fc"
+      data1: 5
+      ensm: [0]
+      name: ["17SPP","member", "lead_time"]
+      col_map: 3
+      share_frame: 2
+    4:
+      type: "fc"
+      data1: 6
+      ensm: [0]
+      name: ["17SPP","member", "lead_time"]
+      col_map: 4
+      share_frame: 2
+  3:
+    1:
+      type: "radar"
+      data1: "/perm/fi3/data_examples/202408270800_acc24h_cumul.tif"
+      data2: "/perm/fi3/data_examples/202408272000_acc24h_cumul.tif"
+      name: "radar"
+      col_map: 1
+      share_frame:
+    2:
+      type: "fc"
+      data1: 7
+      ensm: [0]
+      name: ["17SPP","member", "lead_time"]
+      col_map: 2
+      share_frame: 2
+    3:
+      type: "fc"
+      data1: 8
+      ensm: [0]
+      name: ["17SPP","member", "lead_time"]
+      col_map: 3
+      share_frame: 2
+    4:
+      type: "fc"
+      data1: 9
+      ensm: [0]
+      name: ["17SPP","member", "lead_time"]
+      col_map: 4
+      share_frame: 2
+      
+col_maps:
+  1:
+    name: "scale_fill_precip_b(limits=c(64,2048))"
+    legend: "mm/12h"
+  2:
+    name: 'scale_fill_stepsn(colours="lightblue",limits=c(0.,0.6),breaks=seq(0.,0.6),na.value="transparent",oob=scales::censor,guide="none")'
+    legend:
+  3:
+    name: "scale_fill_precip_b()"
+    legend: "mm/12h"
+  4:
+    name: 'scale_fill_stepsn(colours=scico(16,palette="buda",direction=1,begin=0.95),limits=c(0.01,0.1),breaks=seq(0.01,0.1),na.value="transparent",oob=scales::censor,guide="none")'
+    legend:
+

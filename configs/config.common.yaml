@@ -1,12 +1,24 @@
 local_fa_ml:
-  file_path: "/ec/scratch/fi3/investigation/cycles/"
+  file_path: "/perm/fi3/data_examples/"
   file_template: "{fcst_model}-{YYYY}{MM}{DD}{HH}-m{MBR3}+{LDT3}h"
   file_format: NULL
   file_format_opts: ""
 
 local_fa_pl:
-  file_path: "/ec/scratch/fi3/investigation/cycles/"
+  file_path: "/perm/fi3/data_examples/"
   file_template: "{fcst_model}_pl-{YYYY}{MM}{DD}{HH}-m{MBR3}+{LDT3}h"
+  file_format: NULL
+  file_format_opts: ""
+
+local_grb_ml:
+  file_path: "/perm/fi3/data_examples/"
+  file_template: "{fcst_model}_fc{YYYY}{MM}{DD}{HH}-m{MBR3}+{LDT3}grib2"
+  file_format: NULL
+  file_format_opts: ""
+
+local_grb_pl:
+  file_path: "/perm/fi3/data_examples/"
+  file_template: "{fcst_model}_fc{YYYY}{MM}{DD}{HH}-m{MBR3}+{LDT3}grib2_fp"
   file_format: NULL
   file_format_opts: ""
 
@@ -19,9 +31,6 @@ meps_oper:
 arome_arctic:
   file_path: "https://thredds.met.no/thredds/dodsC/aromearcticarchive"
   file_template: "{YYYY}/{MM}/{DD}/{HH}/arome_arctic_mbr000_sfc_{YYYY}{MM}{DD}T{HH}Z.ncml"
-  exps: ["arctic"]
-  ensm: [0]
-  flds: ["air_temperature_2m"]
   file_format: "netcdf"
   file_format_opts: ""
 
@@ -55,7 +64,7 @@ fill:
     colours: "oslo"
     direction: 1
     limits: "c(-30,-5)"
-    breaks: "seq(-30,-5,-5)"
+    breaks: "seq(-30,-5,5)"
     legend: "t2m" #"bquote(\"[\"*degree*C*\"]\")"
 
   precip5:

@@ -1,0 +1,88 @@
+#
+# DETERMINISTIC FC PLOTTING EXAMPLE 1:
+# the basics
+#
+# Load in one data source. Plot one forecast field from one
+# lead time. Illustrates how the color maps are handled:
+# choose from a quite limited preset list defined in 
+# configs/config.common.yaml or directly write the
+# colormap setup here. The last option is recommended.
+#
+# More detailed comments:
+#
+# The plot part configuration is used to configure how
+# the different plot are arranged, the construct is shown
+# below in comments.
+#
+# You can either specify the path to your data in the
+# configs/config.common.yaml or here by adding file_path
+# to the data section:
+# data:
+#   1:
+#     tmpl: local_fa_pl
+#     data_path: "/ec/scratch/fi3/investigation/deode_spp"
+#     ...
+#
+data:
+  1:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0]
+    flds: ["CLSTEMPERATURE"]
+
+times:
+  sdate: 2025012112
+  lead_times: 6
+
+grid:
+  subgrid:
+  regrid:
+
+opts:
+  fig_name: "fig/example_det1.png"
+  fig_size: [12,4,300] # [width,heigh,dpi]
+  collect_guides: false
+
+# plot:
+#   row1:
+#     column1:
+#       ...
+#     column2:
+#       ...
+#   row2:
+#     column1:
+#       ...
+#     column2:
+#       ...
+plot:
+  1:
+    1:
+      type: "fc"
+      data1: 1
+      ensm: [0]
+      name: 
+      col_map: 1
+    2:
+      type: "fc"
+      data1: 1
+      ensm: [0]
+      name: 
+      col_map: 2
+    3:
+      type: "fc"
+      data1: 1
+      ensm: [0]
+      name: 
+      col_map: 3
+
+col_maps:
+  1:
+    name: "t2m_cold"
+  2:
+    name: "t2m_cold"
+    breaks: "seq(-25,0,5)"
+    legend: "*C"
+  3:
+    name: 'scale_fill_stepsn(colours=scico(54,palette="oslo",direction=1,begin=0),limits=c(-20,0),breaks=c(-20,-15,-10,0))'
+    legend: "*C"
+

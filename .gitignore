@@ -1,0 +1,7 @@
+old/
+*~
+plot_fields-with-obs.R
+fig/*.png
+configs/*
+!config/*example*
+*.png

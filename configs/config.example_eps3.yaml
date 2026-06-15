@@ -1,0 +1,151 @@
+#
+# ENSEMBLE PLOTTING EXAMPLE 3:
+# comparing to thredds archive forecasts
+# 
+# Here we load in accumulated snow fall and total
+# cloud cover for two CY46 experiments. We then also
+# requested operational MEPS data from the met.no thredds
+# archive.
+#
+# More detailed comments:
+#
+# Note that we are not here comparing exactly the
+# same fields as the local FA-files and the MEPS grib
+# files contain a bit different fieldsets: for MEPS oper
+# only total precipitation is available and I have not
+# coded in an option to calculate the total precipitation
+# from rain, snow and graupel precipitation.
+#
+# I noted when comparing the cctot fields that the might
+# be some discrepancy between what is in FA and what is
+# in grib?
+#
+data:
+  1:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0,1,2,3,4,5,6]
+    flds: ["SURFACCNEIGE"]
+    decum: 6
+  2:
+    tmpl: local_fa_pl
+    exp:  ["cy46_uwc_def"]
+    ensm: [0,1,2,3,4,5,6]
+    flds: ["SURFNEBUL.TOTALE"]
+    decum: 
+  3:
+    tmpl: local_fa_pl
+    exp:  ["cy46_meps_preop"]
+    ensm: [0,1,2,3,4,5,6]
+    flds: ["SURFACCNEIGE"]
+    decum: 6
+  4:
+    tmpl: local_fa_pl
+    exp:  ["cy46_meps_preop"]
+    ensm: [0,1,2,3,4,5,6]
+    flds: ["SURFNEBUL.TOTALE"]
+    decum:
+  5:
+    tmpl: meps_oper
+    exp: ["meps"]
+    ensm: [0,1,2,9,12]
+    flds: ["precipitation_amount_acc"]
+    decum: 6
+  6:
+    tmpl: meps_oper
+    exp: ["meps"]
+    ensm: [0,1,2,9,12]
+    flds: ["cloud_area_fraction"]
+    decum: 
+    
+times:
+  sdate: 2025012112
+  lead_times: 12
+
+grid:
+  subgrid: #[250,850,250,850]
+  regrid: true
+
+opts:
+  fig_name: c("fig/example_eps3_",sdate,"+",lead_times,"h.png")
+  fig_size: [16,10,300] # Heigh,width,dpi
+  collect_guides: false
+
+# plot:
+#   row1:
+#     column1:
+#       ...
+#     column2:
+#       ...
+#   row2:
+#     column1:
+#       ...
+#     column2:
+#       ...
+plot:
+  1:
+    1:
+      type: "ens_sd"
+      data1: 1
+      ensm: [0]
+      name: ["UWC enssd", "lead_time"]
+      col_map: 3
+      share_frame:
+    2:
+      type: "ens_sd"
+      data1: 3
+      ensm: [0]
+      name: ["MEPS preop copy enssd", "lead_time"]
+      col_map: 3
+      share_frame:
+    3:
+      type: "ens_sd"
+      data1: 5
+      ensm: [0]
+      name: ["MEPS oper enssd", "lead_time"]
+      col_map: 3
+      share_frame:
+  2:    
+    1:
+      type: "ens_sd"
+      data1: 2
+      ensm: [0]
+      name: 
+      col_map: 5
+      share_frame:
+    2:
+      type: "ens_sd"
+      data1: 4
+      ensm: [0]
+      name: 
+      col_map: 5
+      share_frame:
+    3:
+      type: "ens_sd"
+      data1: 6
+      ensm: [0]
+      name: 
+      col_map: 5
+      share_frame:
+  
+col_maps:
+  1:
+    name: "scale_fill_precip_b(limits=c(64,2048))"
+    legend: "mm"
+  2:
+    name: "contour"
+    colours: "red"
+    limits:
+    break_steps:
+    legend: "hide"
+    alpha: 1.0
+    upscale: 3
+  3:
+    name: "scale_fill_precip_b()"
+    legend: "mm/1h"
+  4:
+    name: 'scale_fill_stepsn(colours=scico(54,palette="acton",direction=-1,begin=0.1),limits=c(0.625,1),breaks=c(0.625,0.75,0.875,1.0),na.value="transparent",oob=scales::censor)'
+    legend: "cctot"
+  5:
+    name: 'scale_fill_stepsn(colours=scico(54,palette="acton",direction=-1,begin=0.1),limits=c(0.125,1),breaks=c(0.125,0.250,0.375,0.5,0.625,0.75,0.875,1.0),na.value="transparent",oob=scales::censor)'
+    legend: "cctot"
